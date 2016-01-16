@@ -60,6 +60,9 @@ execute_process(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lib
 )
 
+# Python bindings.
+find_package(PythonLibs REQUIRED)
+
 # Curlcpp.
 add_subdirectory(3rdparty/lib/curlcpp)
 include_directories(${CURLCPP_SOURCE_DIR}/include)
@@ -105,6 +108,7 @@ include_directories(
     ${MESOS_INSTALLATION_DIR}/include/
     ${CMAKE_BINARY_DIR}/
     $(CMAKE_INCLUDE_PATH)
+    ${PYTHON_INCLUDE_DIRS}/
 )
 
 set(SERENITY_SOURCES
@@ -129,6 +133,7 @@ set(SERENITY_SOURCES
     src/observers/strategies/cache_occupancy.cpp
     src/observers/strategies/cpu_contention.cpp
     src/observers/strategies/seniority.cpp
+    src/qos_controller/serenity_py_controller_module.cpp
     src/serenity/agent_utils.cpp
     src/serenity/resource_helper.cpp
     src/serenity/wid.cpp
@@ -152,6 +157,7 @@ set(SERENITY_TEST_SOURCES
     src/tests/mesos_modules/qos_controller/qos_controller_test.cpp
     src/tests/mesos_modules/resource_estimator/estimator_test.cpp
     src/tests/pipeline/estimator_pipeline_test.cpp
+    src/tests/pipeline/python_qos_pipeline_test.cpp
     src/tests/observers/slack_resource_test.cpp
     src/tests/observers/qos_correction_test.cpp
     src/tests/observers/strategies/cache_occupancy_strategy_test.cpp
@@ -177,9 +183,14 @@ endif(INTEGRATION_TESTS)
 file(GLOB TestFixtures "src/tests/fixtures")
 file(COPY ${TestFixtures} DESTINATION tests/)
 
+# Copy Test Python Pypeline module.
+file(GLOB TestFixtures "src/tests/pipeline/python")
+file(COPY ${TestFixtures} DESTINATION tests/)
+
+
 # Serenity library.
 add_library(serenity SHARED ${SERENITY_SOURCES})
-target_link_libraries(serenity messages curlcpp)
+target_link_libraries(serenity messages curlcpp ${PYTHON_LIBRARIES})
 
 # Tests.
 add_executable(serenity-tests

@@ -12,7 +12,7 @@
 #include "process/clock.hpp"
 #include "process/gtest.hpp"
 
-#include "pipeline/qos_pipeline.hpp"
+#include "pipeline/cpu_qos_pipeline.hpp"
 
 #include "stout/gtest.hpp"
 

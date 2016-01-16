@@ -9,7 +9,7 @@
 
 #include "mesos_modules/qos_controller/serenity_controller.hpp"
 
-#include "pipeline/qos_pipeline.hpp"
+#include "pipeline/cpu_qos_pipeline.hpp"
 
 #include "serenity/config.hpp"
 
