@@ -35,6 +35,8 @@ class PypelineFilterConfig : public SerenityConfig {
       (std::string) python_pipeline::DEFAULT_SERENITY_PYPELINE_MODULE;
     this->fields[python_pipeline::SERENITY_PYPELINE_CLASS] =
       (std::string) python_pipeline::DEFAULT_SERENITY_PYPELINE_CLASS;
+    this->fields[python_pipeline::SERENITY_PYPELINE_RUN] =
+      (std::string) python_pipeline::DEFAULT_SERENITY_PYPELINE_RUN;
   }
 };
 
@@ -64,24 +66,40 @@ class PypelineFilter :
     cfgSerenityPypelineClass =
       config.getS(python_pipeline::SERENITY_PYPELINE_CLASS);
 
+    cfgSerenityPypelineRun =
+      config.getS(python_pipeline::SERENITY_PYPELINE_RUN);
+
     initializePythonInterpreter();
   }
 
   ~PypelineFilter() {
-    Py_Finalize();
   }
 
   static const constexpr char* NAME = "PypelineFilter";
 
   Try<Nothing> consume(const ResourceUsage& in) {
-    if (pyInstance == nullptr) {
+    if (pyInstance.is_none()) {
       return Error("Class from path " + cfgSerenityPypelinePath
                    + " not initialized.");
     }
 
+    Contentions contentions = Contentions();
+
+    try {
+      // TODO(bplotka): Pass Usage things inside.
+
+      pyResponse =
+        pyInstance.attr(cfgSerenityPypelineRun.c_str())(fromUsage(in));
+
+    } catch (const std::exception e) {
+      PyErr_Print();
+      PyErr_Clear();
+      SERENITY_LOG(ERROR) << "Error while initializing Pypeline";
+    }
+
     // Continue pipeline. Currently, we won't receive any automatic
     // scheduling actions.
-    produce(Contentions());
+    produce(contentions);
 
     return Nothing();
   }
@@ -89,11 +107,12 @@ class PypelineFilter :
  private:
   const Tag tag;
 
-  boost::python::object pyModule, pyInstance;
+  boost::python::object pyModule, pyInstance, pyResponse;
 
   std::string cfgSerenityPypelinePath;
   std::string cfgSerenityPypelineModule;
   std::string cfgSerenityPypelineClass;
+  std::string cfgSerenityPypelineRun;
 
   void initializePythonInterpreter() {
     // Initialize Python interpreter.
@@ -110,62 +129,19 @@ class PypelineFilter :
 
       pyInstance = pyModule.attr(cfgSerenityPypelineClass.c_str())();
 
-    } catch (...) {
+    } catch (const std::exception e) {
       PyErr_Print();
       PyErr_Clear();
-      SERENITY_LOG(ERROR) << "Error while initializing Python pypeline";
+      SERENITY_LOG(ERROR) << "Error while initializing Pypeline";
     }
 
+    SERENITY_LOG(INFO) << "Pypeline initialized.";
+  }
 
+  boost::python::dict fromUsage(ResourceUsage usage) {
+    boost::python::dict pyUsage;
 
-
-//    SERENITY_LOG(INFO) << "Importing...";
-//    pySerenityPypelineModule =
-//      PyImport_ImportModule(cfgSerenityPypelineModule.c_str());
-//    SERENITY_LOG(INFO) << "Debug...";
-//    if (pySerenityPypelineModule == NULL) {
-//      PyErr_Print();
-//      SERENITY_LOG(ERROR) << "Cannot import Python Module "
-//      << cfgSerenityPypelineModule << " from path: "
-//      << cfgSerenityPypelinePath;
-//
-//      return;
-//    }
-//
-//    SERENITY_LOG(INFO) << "Imported Python Module "
-//    << cfgSerenityPypelineModule << " from path: "
-//    << cfgSerenityPypelinePath;
-//
-//    pyClass = PyObject_GetAttrString(pySerenityPypelineModule,
-//                                     cfgSerenityPypelineClass.c_str());
-//    if (pyClass == NULL) {
-//      PyErr_Print();
-//      SERENITY_LOG(ERROR) << "Cannot get class "
-//      << cfgSerenityPypelineClass << " from path: "
-//      << cfgSerenityPypelinePath;
-//    }
-//
-//    pyInstance = PyObject_CallObject(pyClass, NULL);
-//    if (pyInstance == NULL) {
-//      PyErr_Print();
-//      SERENITY_LOG(ERROR) << "Cannot instantiate "
-//      << cfgSerenityPypelineClass << " from path: "
-//      << cfgSerenityPypelinePath;
-//
-//      return;
-//    }
-//    Py_INCREF(pyInstance);
-//
-//
-//
-//    pyRunMethod = PyObject_GetAttrString(pyInstance, "run");
-//    if (pyRunMethod == NULL) {
-//      PyErr_Print();
-//      SERENITY_LOG(ERROR) << "Run method undefined in class: "
-//        << cfgSerenityPypelineClass;
-//
-//      return;
-//    }
+    return pyUsage;
   }
 };
 

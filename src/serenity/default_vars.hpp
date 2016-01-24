@@ -23,6 +23,8 @@ const constexpr char* SERENITY_PYPELINE_MODULE = "SERENITY_PYPELINE_MODULE";
 const constexpr char* DEFAULT_SERENITY_PYPELINE_MODULE = "pypeline_engine";
 const constexpr char* SERENITY_PYPELINE_CLASS = "SERENITY_PYPELINE_CLASS";
 const constexpr char* DEFAULT_SERENITY_PYPELINE_CLASS = "PipelineEngine";
+const constexpr char* SERENITY_PYPELINE_RUN = "SERENITY_PYPELINE_RUN";
+const constexpr char* DEFAULT_SERENITY_PYPELINE_RUN = "run";
 }  // namespace python_pipeline
 
 
