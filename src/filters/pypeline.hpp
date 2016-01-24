@@ -31,6 +31,10 @@ class PypelineFilterConfig : public SerenityConfig {
   void initDefaults() {
     this->fields[python_pipeline::SERENITY_PYPELINE_PATH] =
       (std::string) python_pipeline::DEFAULT_SERENITY_PYPELINE_PATH;
+    this->fields[python_pipeline::SERENITY_PYPELINE_MODULE] =
+      (std::string) python_pipeline::DEFAULT_SERENITY_PYPELINE_MODULE;
+    this->fields[python_pipeline::SERENITY_PYPELINE_CLASS] =
+      (std::string) python_pipeline::DEFAULT_SERENITY_PYPELINE_CLASS;
   }
 };
 
@@ -54,6 +58,12 @@ class PypelineFilter :
     cfgSerenityPypelinePath =
       config.getS(python_pipeline::SERENITY_PYPELINE_PATH);
 
+    cfgSerenityPypelineModule =
+      config.getS(python_pipeline::SERENITY_PYPELINE_MODULE);
+
+    cfgSerenityPypelineClass =
+      config.getS(python_pipeline::SERENITY_PYPELINE_CLASS);
+
     initializePythonInterpreter();
   }
 
@@ -64,9 +74,9 @@ class PypelineFilter :
   static const constexpr char* NAME = "PypelineFilter";
 
   Try<Nothing> consume(const ResourceUsage& in) {
-    if (pySerenityPypeline == NULL) {
-      return Error("Module from path " + cfgSerenityPypelinePath
-                   + " not imported.");
+    if (pyInstance == nullptr) {
+      return Error("Class from path " + cfgSerenityPypelinePath
+                   + " not initialized.");
     }
 
     // Continue pipeline. Currently, we won't receive any automatic
@@ -79,9 +89,11 @@ class PypelineFilter :
  private:
   const Tag tag;
 
-  PyObject* pySerenityPypeline, *pDict;
+  boost::python::object pyModule, pyInstance;
 
   std::string cfgSerenityPypelinePath;
+  std::string cfgSerenityPypelineModule;
+  std::string cfgSerenityPypelineClass;
 
   void initializePythonInterpreter() {
     // Initialize Python interpreter.
@@ -92,18 +104,68 @@ class PypelineFilter :
     PyRun_SimpleString(std::string("sys.path.append('" +
                          cfgSerenityPypelinePath + "')\n").c_str());
 
-    SERENITY_LOG(INFO) << "Importing...";
-    pySerenityPypeline =
-      PyImport_ImportModule("pypeline_test");
-    SERENITY_LOG(INFO) << "Debug...";
-    if (pySerenityPypeline == NULL) {
+    try {
+
+      pyModule = boost::python::import(cfgSerenityPypelineModule.c_str());
+
+      pyInstance = pyModule.attr(cfgSerenityPypelineClass.c_str())();
+
+    } catch (...) {
       PyErr_Print();
-      SERENITY_LOG(ERROR) << "Cannot import Python Module from path: "
-      << cfgSerenityPypelinePath;
-    } else {
-      SERENITY_LOG(INFO) << "Imported Python Module from path: "
-      << cfgSerenityPypelinePath;
+      PyErr_Clear();
+      SERENITY_LOG(ERROR) << "Error while initializing Python pypeline";
     }
+
+
+
+
+//    SERENITY_LOG(INFO) << "Importing...";
+//    pySerenityPypelineModule =
+//      PyImport_ImportModule(cfgSerenityPypelineModule.c_str());
+//    SERENITY_LOG(INFO) << "Debug...";
+//    if (pySerenityPypelineModule == NULL) {
+//      PyErr_Print();
+//      SERENITY_LOG(ERROR) << "Cannot import Python Module "
+//      << cfgSerenityPypelineModule << " from path: "
+//      << cfgSerenityPypelinePath;
+//
+//      return;
+//    }
+//
+//    SERENITY_LOG(INFO) << "Imported Python Module "
+//    << cfgSerenityPypelineModule << " from path: "
+//    << cfgSerenityPypelinePath;
+//
+//    pyClass = PyObject_GetAttrString(pySerenityPypelineModule,
+//                                     cfgSerenityPypelineClass.c_str());
+//    if (pyClass == NULL) {
+//      PyErr_Print();
+//      SERENITY_LOG(ERROR) << "Cannot get class "
+//      << cfgSerenityPypelineClass << " from path: "
+//      << cfgSerenityPypelinePath;
+//    }
+//
+//    pyInstance = PyObject_CallObject(pyClass, NULL);
+//    if (pyInstance == NULL) {
+//      PyErr_Print();
+//      SERENITY_LOG(ERROR) << "Cannot instantiate "
+//      << cfgSerenityPypelineClass << " from path: "
+//      << cfgSerenityPypelinePath;
+//
+//      return;
+//    }
+//    Py_INCREF(pyInstance);
+//
+//
+//
+//    pyRunMethod = PyObject_GetAttrString(pyInstance, "run");
+//    if (pyRunMethod == NULL) {
+//      PyErr_Print();
+//      SERENITY_LOG(ERROR) << "Run method undefined in class: "
+//        << cfgSerenityPypelineClass;
+//
+//      return;
+//    }
   }
 };
 

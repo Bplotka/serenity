@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-class Test(object):
+class PdypelineTest(object):
   def __init__(self):
     print "A"
 

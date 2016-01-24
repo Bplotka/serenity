@@ -190,7 +190,8 @@ file(COPY ${TestFixtures} DESTINATION tests/)
 
 # Serenity library.
 add_library(serenity SHARED ${SERENITY_SOURCES})
-target_link_libraries(serenity messages curlcpp ${PYTHON_LIBRARIES})
+target_link_libraries(serenity boost_python messages curlcpp
+        ${PYTHON_LIBRARIES})
 
 # Tests.
 add_executable(serenity-tests

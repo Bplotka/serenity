@@ -18,6 +18,8 @@ namespace serenity {
 namespace tests {
 
 const constexpr char* TEST_PYPELINE_PATH = "tests/python/";
+const constexpr char* TEST_PYPELINE_MODULE = "pypeline_test";
+const constexpr char* TEST_PYPELINE_CLASS = "PypelineTest";
 
 TEST(PythonQoSPipelineTest, RunPythonTestPipeline) {
   uint64_t WINDOWS_SIZE = 10;
@@ -36,6 +38,12 @@ TEST(PythonQoSPipelineTest, RunPythonTestPipeline) {
   SerenityConfig conf;
   conf[PypelineFilter::NAME].set(SERENITY_PYPELINE_PATH,
                                  (std::string) TEST_PYPELINE_PATH);
+
+  conf[PypelineFilter::NAME].set(SERENITY_PYPELINE_MODULE,
+                                 (std::string) TEST_PYPELINE_MODULE);
+
+  conf[PypelineFilter::NAME].set(SERENITY_PYPELINE_CLASS,
+                                 (std::string) TEST_PYPELINE_CLASS);
 
   double onEmptyCorrectionInterval = 2;
 
