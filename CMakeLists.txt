@@ -84,6 +84,7 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 # Add message proto files.
 file(GLOB ProtoFiles "src/messages/serenity.proto")
 PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
+execute_process(COMMAND protoc -I=/mesos/include/:/serenity --python_out=./ /serenity/src/messages/serenity.proto)
 add_library(messages STATIC ${ProtoSources} ${ProtoHeaders})
 target_link_libraries(messages)
 
@@ -187,6 +188,8 @@ file(COPY ${TestFixtures} DESTINATION tests/)
 file(GLOB TestFixtures "src/tests/pipeline/python")
 file(COPY ${TestFixtures} DESTINATION tests/)
 
+file(GLOB TestFixtures "build/src/messages/serenity_pb2.py")
+file(COPY ${TestFixtures} DESTINATION tests/python/)
 
 # Serenity library.
 add_library(serenity SHARED ${SERENITY_SOURCES})

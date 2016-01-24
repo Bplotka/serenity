@@ -9,6 +9,7 @@
 #include <boost/python.hpp>
 
 #include "mesos/mesos.hpp"
+#include "google/protobuf/message.h"
 
 #include "messages/serenity.hpp"
 
@@ -87,9 +88,13 @@ class PypelineFilter :
 
     try {
       // TODO(bplotka): Pass Usage things inside.
+      std::string usageStr;
+      in.SerializeToString(&usageStr);
+
+      boost::python::str usageProto(usageStr);
 
       pyResponse =
-        pyInstance.attr(cfgSerenityPypelineRun.c_str())(fromUsage(in));
+        pyInstance.attr(cfgSerenityPypelineRun.c_str())(usageProto);
 
     } catch (const std::exception e) {
       PyErr_Print();
@@ -122,7 +127,6 @@ class PypelineFilter :
     PyRun_SimpleString("import sys\n");
     PyRun_SimpleString(std::string("sys.path.append('" +
                          cfgSerenityPypelinePath + "')\n").c_str());
-
     try {
 
       pyModule = boost::python::import(cfgSerenityPypelineModule.c_str());
@@ -138,11 +142,6 @@ class PypelineFilter :
     SERENITY_LOG(INFO) << "Pypeline initialized.";
   }
 
-  boost::python::dict fromUsage(ResourceUsage usage) {
-    boost::python::dict pyUsage;
-
-    return pyUsage;
-  }
 };
 
 }  // namespace serenity
