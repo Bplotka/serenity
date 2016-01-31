@@ -58,10 +58,9 @@ class InfluxDb8Backend : public TimeSeriesBackend {
                               Option<std::string> _envVariableName,
                               std::string _defaultValue);
 
-  const std::string influxDbName;
   const std::string influxDbAddress;
   const uint32_t    influxDbPort;
-
+  const std::string influxDbName;
   const std::string influxDbUser;
   const std::string influxDbPass;
 

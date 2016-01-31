@@ -162,15 +162,14 @@ class TimeSeriesRecord {
   }
 
  protected:
+  const std::string      seriesName;  //!< Series name in backend.
+  const Option<double_t> timestamp;
   /**
    * String with tags that will be added to database
    * It's string->string, and not tag->string for purpose
    * of adding custom tags.
    */
   std::unordered_map<std::string, Variant> tags;
-
-  const std::string      seriesName;  //!< Series name in backend.
-  const Option<double_t> timestamp;
 };
 
 
