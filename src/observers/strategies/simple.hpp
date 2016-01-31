@@ -39,7 +39,9 @@ class SimpleStrategy : public RevocationStrategy {
     SerenityConfig config = SimpleStrategyConfig(_config);
   }
 
-  RevocationStrategyFunction decide;
+  Try<QoSCorrections> decide(ExecutorAgeFilter*,
+                             const Contentions&,
+                             const ResourceUsage&);
 
   static const constexpr char* NAME = "SimpleStrategy";
  private:

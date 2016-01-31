@@ -7,8 +7,8 @@ class PypelineTest(object):
   def __init__(self):
     print "Initialized"
 
-  def run(self, protoUsage):
+  def run(self, **kwargs):
     usagePy = mesos_pb2.ResourceUsage()
-    usagePy.ParseFromString(protoUsage)
+    usagePy.ParseFromString(kwargs)
 
     print usagePy
