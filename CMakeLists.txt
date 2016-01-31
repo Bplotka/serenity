@@ -188,8 +188,12 @@ file(COPY ${TestFixtures} DESTINATION tests/)
 file(GLOB TestFixtures "src/tests/pipeline/python")
 file(COPY ${TestFixtures} DESTINATION tests/)
 
-file(GLOB TestFixtures "build/src/messages/serenity_pb2.py")
+file(GLOB TestFixtures "src/messages/serenity_pb2.py")
 file(COPY ${TestFixtures} DESTINATION tests/python/)
+
+file(GLOB TestFixtures "src/messages/mesos_pb2.py")
+file(COPY ${TestFixtures} DESTINATION tests/python/)
+
 
 # Serenity library.
 add_library(serenity SHARED ${SERENITY_SOURCES})

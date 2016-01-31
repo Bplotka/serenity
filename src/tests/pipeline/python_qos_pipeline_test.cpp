@@ -53,6 +53,10 @@ TEST(PythonQoSPipelineTest, RunPythonTestPipeline) {
 
   EXPECT_NONE(corrections);
 
+  corrections = pipeline->run(usage);
+
+  EXPECT_NONE(corrections);
+
   delete pipeline;
 }
 

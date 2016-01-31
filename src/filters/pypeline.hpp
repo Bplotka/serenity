@@ -96,10 +96,10 @@ class PypelineFilter :
       pyResponse =
         pyInstance.attr(cfgSerenityPypelineRun.c_str())(usageProto);
 
-    } catch (const std::exception e) {
+    } catch (boost::python::error_already_set& e) {
       PyErr_Print();
       PyErr_Clear();
-      SERENITY_LOG(ERROR) << "Error while initializing Pypeline";
+      SERENITY_LOG(ERROR) << "Error while running Pypeline";
     }
 
     // Continue pipeline. Currently, we won't receive any automatic
@@ -127,16 +127,22 @@ class PypelineFilter :
     PyRun_SimpleString("import sys\n");
     PyRun_SimpleString(std::string("sys.path.append('" +
                          cfgSerenityPypelinePath + "')\n").c_str());
+
     try {
-
       pyModule = boost::python::import(cfgSerenityPypelineModule.c_str());
-
-      pyInstance = pyModule.attr(cfgSerenityPypelineClass.c_str())();
-
-    } catch (const std::exception e) {
+    } catch (boost::python::error_already_set& e) {
       PyErr_Print();
       PyErr_Clear();
-      SERENITY_LOG(ERROR) << "Error while initializing Pypeline";
+      SERENITY_LOG(ERROR) << "Error while importing PyModule";
+    }
+
+    try {
+      pyInstance = pyModule.attr(cfgSerenityPypelineClass.c_str())();
+
+    } catch (boost::python::error_already_set& e) {
+      PyErr_Print();
+      PyErr_Clear();
+      SERENITY_LOG(ERROR) << "Error while initializing Pypeline Class";
     }
 
     SERENITY_LOG(INFO) << "Pypeline initialized.";
