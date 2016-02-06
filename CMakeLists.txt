@@ -127,6 +127,7 @@ set(SERENITY_SOURCES
     src/filters/valve.cpp
     src/mesos_modules/qos_controller/serenity_controller.cpp
     src/mesos_modules/qos_controller/serenity_controller_module.cpp
+    src/mesos_modules/qos_controller/serenity_py_controller_module.cpp
     src/mesos_modules/resource_estimator/serenity_estimator.cpp
     src/mesos_modules/resource_estimator/serenity_estimator_module.cpp
     src/observers/qos_correction.cpp
@@ -134,7 +135,7 @@ set(SERENITY_SOURCES
     src/observers/strategies/cache_occupancy.cpp
     src/observers/strategies/cpu_contention.cpp
     src/observers/strategies/seniority.cpp
-    src/qos_controller/serenity_py_controller_module.cpp
+    src/observers/strategies/simple.cpp
     src/serenity/agent_utils.cpp
     src/serenity/resource_helper.cpp
     src/serenity/wid.cpp
