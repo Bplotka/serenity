@@ -17,9 +17,10 @@ constexpr bool DEFAULT_ENABLED_VISUALISATION = true;
 namespace python_pipeline {
 const constexpr char* SERENITY_PYPELINE_PATH = "SERENITY_PYPELINE_PATH";
 const constexpr char* DEFAULT_SERENITY_PYPELINE_PATH =
-  "/usr/local/lib/python27/serenity-pypeline/serenity_pypeline";
+  "/usr/local/lib/python2.7/site-packages/serenity-pypeline";
 const constexpr char* SERENITY_PYPELINE_MODULE = "SERENITY_PYPELINE_MODULE";
-const constexpr char* DEFAULT_SERENITY_PYPELINE_MODULE = "pypeline_engine";
+const constexpr char* DEFAULT_SERENITY_PYPELINE_MODULE = "serenity_pypeline"
+  ".pipeline_engine";
 const constexpr char* SERENITY_PYPELINE_CLASS = "SERENITY_PYPELINE_CLASS";
 const constexpr char* DEFAULT_SERENITY_PYPELINE_CLASS = "PipelineEngine";
 const constexpr char* SERENITY_PYPELINE_RUN = "SERENITY_PYPELINE_RUN";

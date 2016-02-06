@@ -133,7 +133,8 @@ class PypelineFilter :
     } catch (boost::python::error_already_set& e) {
       PyErr_Print();
       PyErr_Clear();
-      SERENITY_LOG(ERROR) << "Error while importing PyModule";
+      SERENITY_LOG(ERROR) << "Error while importing PyModule "
+        << cfgSerenityPypelineModule << " from path " << cfgSerenityPypelinePath;
     }
 
     try {

@@ -60,6 +60,37 @@ TEST(PythonQoSPipelineTest, RunPythonTestPipeline) {
   delete pipeline;
 }
 
+//TEST(PythonQoSPipelineTest, RunPythonTestPipelineGlobal) {
+//  uint64_t WINDOWS_SIZE = 10;
+//  uint64_t CONTENTION_COOLDOWN = 10;
+//  double_t FRATIONAL_THRESHOLD = 0.5;
+//
+//  Try<mesos::FixtureResourceUsage> usages =
+//    JsonUsage::ReadJson("tests/fixtures/pipeline/insufficient_metrics.json");
+//  if (usages.isError()) {
+//    LOG(ERROR) << "JsonSource failed: " << usages.error() << std::endl;
+//  }
+//
+//  ResourceUsage usage;
+//  usage.CopyFrom(usages.get().resource_usage(0));
+//
+//  SerenityConfig conf;
+//
+//  double onEmptyCorrectionInterval = 2;
+//
+//  QoSControllerPipeline* pipeline = new PythonQoSPipeline(conf);
+//
+//  Result<QoSCorrections> corrections = pipeline->run(usage);
+//
+//  EXPECT_NONE(corrections);
+//
+//  corrections = pipeline->run(usage);
+//
+//  EXPECT_NONE(corrections);
+//
+//  delete pipeline;
+//}
+
 }  // namespace tests
 }  // namespace serenity
 }  // namespace mesos
