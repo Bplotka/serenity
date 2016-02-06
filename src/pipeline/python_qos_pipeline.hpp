@@ -28,16 +28,7 @@ class PythonQoSPipelineConfig : public SerenityConfig {
     this->applyConfig(customCfg);
   }
 
-  void initDefaults() {
-    this->set(SERENITY_PYPELINE_PATH,
-              (std::string) DEFAULT_SERENITY_PYPELINE_PATH);
-
-    this->set(SERENITY_PYPELINE_MODULE,
-              (std::string) DEFAULT_SERENITY_PYPELINE_MODULE);
-
-    this->set(SERENITY_PYPELINE_CLASS,
-              (std::string) DEFAULT_SERENITY_PYPELINE_CLASS);
-  }
+  void initDefaults() {}
 };
 
 

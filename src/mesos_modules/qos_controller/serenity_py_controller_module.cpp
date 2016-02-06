@@ -39,7 +39,13 @@ static QoSController* createSerenityPyController(
 
   SerenityConfig conf;
   conf[PypelineFilter::NAME].set(SERENITY_PYPELINE_PATH,
-                           DEFAULT_SERENITY_PYPELINE_PATH);
+                                 (std::string) DEFAULT_SERENITY_PYPELINE_PATH);
+
+  conf[PypelineFilter::NAME].set(SERENITY_PYPELINE_MODULE,
+                                 (std::string) DEFAULT_SERENITY_PYPELINE_MODULE);
+
+  conf[PypelineFilter::NAME].set(SERENITY_PYPELINE_CLASS,
+                                 (std::string) DEFAULT_SERENITY_PYPELINE_CLASS);
 
   // Since slave is configured for 5 second perf interval, it is useless to
   // check correction more often then 5 sec.
