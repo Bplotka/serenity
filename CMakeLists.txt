@@ -10,13 +10,13 @@ if (USE_CLANG)
     set(CMAKE_C_FLAGS_RELEASE   "-O4 -DNDEBUG")
     set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
     set(CMAKE_CXX_COMPILER "/usr/bin/clang-3.5")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(EXTRA_LIBRARIES "stdc++ m")
 endif(USE_CLANG)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 project(serenity)
@@ -28,6 +28,14 @@ set(MESOS_INSTALLATION_DIR ${WITH_MESOS})
 message("Mesos installation directory set to: " ${MESOS_INSTALLATION_DIR})
 
 option(INTEGRATION_TESTS "Enable compilation of integration tests." OFF)
+option(CMT_ENABLED "Enable revocation based on LLC_OCCUPANCY metric." OFF)
+if(CMT_ENABLED)
+    message(WARNING "CMT SUPPORT IS ENABLED.")
+    message("It needs to have llc_occupacy metric in ResourceUsage proto.")
+    message("If Serenity does not compile, try to compile it against")
+    message("https://github.com/Bplotka/mesos/tree/perf-fix-0.24.1")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCMT_ENABLED")
+endif()
 
 # Compiler things.
 include(CheckCXXCompilerFlag)
@@ -52,6 +60,9 @@ execute_process(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lib
 )
 
+# Python bindings.
+find_package(PythonLibs REQUIRED)
+
 # Curlcpp.
 add_subdirectory(3rdparty/lib/curlcpp)
 include_directories(${CURLCPP_SOURCE_DIR}/include)
@@ -73,6 +84,7 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 # Add message proto files.
 file(GLOB ProtoFiles "src/messages/serenity.proto")
 PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
+execute_process(COMMAND protoc -I=/mesos/include/:/serenity --python_out=./ /serenity/src/messages/serenity.proto)
 add_library(messages STATIC ${ProtoSources} ${ProtoHeaders})
 target_link_libraries(messages)
 
@@ -96,12 +108,12 @@ include_directories(
     ${pbjson_SOURCE_DIR}/src/
     ${MESOS_INSTALLATION_DIR}/include/
     ${CMAKE_BINARY_DIR}/
+    $(CMAKE_INCLUDE_PATH)
+    ${PYTHON_INCLUDE_DIRS}/
 )
 
 set(SERENITY_SOURCES
     src/bus/event_bus.cpp
-    src/estimator/serenity_estimator.cpp
-    src/estimator/serenity_estimator_module.cpp
     src/contention_detectors/signal_based.cpp
     src/contention_detectors/signal_analyzers/drop.cpp
     src/contention_detectors/too_high_cpu.cpp
@@ -113,13 +125,19 @@ set(SERENITY_SOURCES
     src/filters/too_low_usage.cpp
     src/filters/utilization_threshold.cpp
     src/filters/valve.cpp
+    src/mesos_modules/qos_controller/serenity_controller.cpp
+    src/mesos_modules/qos_controller/serenity_controller_module.cpp
+    src/mesos_modules/qos_controller/serenity_py_controller_module.cpp
+    src/mesos_modules/resource_estimator/serenity_estimator.cpp
+    src/mesos_modules/resource_estimator/serenity_estimator_module.cpp
     src/observers/qos_correction.cpp
     src/observers/slack_resource.cpp
-    src/observers/strategies/kill_all.cpp
+    src/observers/strategies/cache_occupancy.cpp
+    src/observers/strategies/cpu_contention.cpp
     src/observers/strategies/seniority.cpp
-    src/qos_controller/serenity_controller.cpp
-    src/qos_controller/serenity_controller_module.cpp
+    src/observers/strategies/simple.cpp
     src/serenity/agent_utils.cpp
+    src/serenity/resource_helper.cpp
     src/serenity/wid.cpp
     src/time_series_export/resource_usage_ts_export.cpp
     src/time_series_export/slack_ts_export.cpp
@@ -130,20 +148,25 @@ set(SERENITY_TEST_SOURCES
     src/tests/main.cpp
     src/tests/bus/event_bus_tests.cpp
     src/tests/common/sources/json_source.cpp
-    src/tests/controllers/qos_controller_test.cpp
     src/tests/contention_detectors/signal_analyzers/drop_test.cpp
     src/tests/contention_detectors/too_high_cpu_usage_test.cpp
-    src/tests/estimators/estimator_test.cpp
+    src/tests/filters/correction_merger_test.cpp
     src/tests/filters/ema_test.cpp
     src/tests/filters/ignore_new_executors_test.cpp
     src/tests/filters/pr_executor_pass_test.cpp
     src/tests/filters/utilization_threshold_test.cpp
     src/tests/filters/valve_test.cpp
+    src/tests/mesos_modules/qos_controller/qos_controller_test.cpp
+    src/tests/mesos_modules/resource_estimator/estimator_test.cpp
     src/tests/pipeline/estimator_pipeline_test.cpp
+    src/tests/pipeline/python_qos_pipeline_test.cpp
     src/tests/observers/slack_resource_test.cpp
     src/tests/observers/qos_correction_test.cpp
+    src/tests/observers/strategies/cache_occupancy_strategy_test.cpp
+    src/tests/observers/strategies/seniority_strategy_test
     src/tests/serenity/config_test.cpp
     src/tests/serenity/os_utils_tests.cpp
+    src/tests/serenity/resource_helper_test.cpp
     src/tests/sources/json_source_test.cpp
 )
 
@@ -155,16 +178,28 @@ if (INTEGRATION_TESTS)
         # Needs InfluxDB 0.8.8
         src/tests/time_series_export/resource_usage_ts_export_test.cpp
         src/tests/time_series_export/slack_ts_export_test.cpp
-    )
+       )
 endif(INTEGRATION_TESTS)
 
 # Copy fixtures.
 file(GLOB TestFixtures "src/tests/fixtures")
 file(COPY ${TestFixtures} DESTINATION tests/)
 
+# Copy Test Python Pypeline module.
+file(GLOB TestFixtures "src/tests/pipeline/python")
+file(COPY ${TestFixtures} DESTINATION tests/)
+
+file(GLOB TestFixtures "src/messages/serenity_pb2.py")
+file(COPY ${TestFixtures} DESTINATION tests/python/)
+
+file(GLOB TestFixtures "src/messages/mesos_pb2.py")
+file(COPY ${TestFixtures} DESTINATION tests/python/)
+
+
 # Serenity library.
 add_library(serenity SHARED ${SERENITY_SOURCES})
-target_link_libraries(serenity messages curlcpp)
+target_link_libraries(serenity boost_python messages curlcpp
+        ${PYTHON_LIBRARIES})
 
 # Tests.
 add_executable(serenity-tests
@@ -190,8 +225,8 @@ target_link_libraries(serenity-tests
 add_test(serenity-tests serenity-tests)
 
 
-# Smoke-test-framework requires mesos source directory.
-# If WITH_SOURCE_MESOS is not specified, test-framework is omitted.
+# Smoke Test Framework requires mesos source directory.
+# If WITH_SOURCE_MESOS is not specified, STF is omitted.
 set(WITH_SOURCE_MESOS "" CACHE STRING "Mesos source directory")
 set(MESOS_SOURCE_DIR ${WITH_SOURCE_MESOS})
 
@@ -201,17 +236,17 @@ if (MESOS_SOURCE_DIR)
     include_directories(
         ${MESOS_SOURCE_DIR}/build/src/
         ${MESOS_SOURCE_DIR}/src/
-        src/framework/
+        src/mesos_frameworks/smoke_test/
         src/time_series_export/
     )
     # Serenity test framework exe.
-    add_executable(test-framework
-        src/framework/smoke_test_framework.cpp
+    add_executable(smoke_test_framework
+        src/mesos_frameworks/smoke_test/smoke_test_framework.cpp
         src/time_series_export/backend/influx_db8.cpp)
-    target_link_libraries(test-framework mesos protobuf glog stdc++ m curlcpp)
+    target_link_libraries(smoke_test_framework mesos protobuf glog stdc++ m curlcpp)
 
 else(MESOS_SOURCE_DIR)
     message(
         "Mesos source directory was not set. "
-        "Test-framework compilation will be omitted.")
+        "Smoke Test Framework compilation will be omitted.")
 endif(MESOS_SOURCE_DIR)

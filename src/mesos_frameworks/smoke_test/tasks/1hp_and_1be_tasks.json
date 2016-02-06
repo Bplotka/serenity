@@ -1,0 +1,18 @@
+{
+  "tasks": [
+    {
+      "command": "stress -c 1",
+      "taskResources": "cpus(*):2;mem(*):64",
+      "revocableResources": "",
+      "targetHostname": "<target ip>",
+      "totalTasks": 1
+    },
+    {
+      "command": "stress -c 1",
+      "taskResources": "mem(*):64",
+      "revocableResources": "cpus(*):1.0",
+      "targetHostname": "<target_ip>",
+      "totalTasks": 1
+    }
+  ]
+}

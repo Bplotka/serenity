@@ -1,4 +1,4 @@
-FROM bplotka/mesos-modules-dev:0.24.1-cmt
+FROM bplotka/mesos-modules-dev:0.25.0
 MAINTAINER serenity
 
 ADD . /serenity
@@ -19,6 +19,7 @@ RUN rm -rf build && \
     export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/usr/local/lib && \
     cmake -DWITH_MESOS="/mesos" \
           -DWITH_SOURCE_MESOS="/mesos" \
-          -DUSE_CLANG=ON ..  && \
+          -DCMT_ENABLED=OFF \
+          -DUSE_CLANG=OFF ..  && \
     make -j 2 && \
     ./serenity-tests

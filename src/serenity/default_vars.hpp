@@ -14,6 +14,19 @@ const constexpr char* ENABLED_VISUALISATION = "ENABLED_VISUALISATION";
 constexpr bool DEFAULT_ENABLED_VISUALISATION = true;
 }  // namespace qos_pipeline
 
+namespace python_pipeline {
+const constexpr char* SERENITY_PYPELINE_PATH = "SERENITY_PYPELINE_PATH";
+const constexpr char* DEFAULT_SERENITY_PYPELINE_PATH =
+  "/usr/local/lib/python2.7/site-packages/serenity-pypeline";
+const constexpr char* SERENITY_PYPELINE_MODULE = "SERENITY_PYPELINE_MODULE";
+const constexpr char* DEFAULT_SERENITY_PYPELINE_MODULE = "serenity_pypeline"
+  ".pipeline_engine";
+const constexpr char* SERENITY_PYPELINE_CLASS = "SERENITY_PYPELINE_CLASS";
+const constexpr char* DEFAULT_SERENITY_PYPELINE_CLASS = "PipelineEngine";
+const constexpr char* SERENITY_PYPELINE_RUN = "SERENITY_PYPELINE_RUN";
+const constexpr char* DEFAULT_SERENITY_PYPELINE_RUN = "run";
+}  // namespace python_pipeline
+
 
 namespace ema {
 /**
@@ -68,12 +81,14 @@ const constexpr char* MINIMAL_CPU_USAGE = "MINIMAL_CPU_USAGE";
 constexpr double_t DEFAULT_MINIMAL_CPU_USAGE = 0.25;  // !< per sec.
 }  // namespace too_low_usage
 
-namespace decider {
+namespace strategy {
 const constexpr char* CONTENTION_COOLDOWN = "CONTENTION_COOLDOWN";
 constexpr uint64_t DEFAULT_CONTENTION_COOLDOWN = 10;
-const constexpr char* STARTING_SEVERITY = "STARTING_SEVERITY";
+const constexpr char* DEFAULT_CPU_SEVERITY = "DEFAULT_CPU_SEVERITY";
+constexpr double_t DEFAULT_DEFAULT_CPU_SEVERITY = 1.0;
+static const constexpr char* STARTING_SEVERITY = "STARTING_SEVERITY";
 constexpr double_t DEFAULT_STARTING_SEVERITY = 0.1;
-}  // namespace decider
+}  // namespace strategy
 
 }  // namespace serenity
 }  // namespace mesos
