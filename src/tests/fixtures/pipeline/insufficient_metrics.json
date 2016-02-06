@@ -3,6 +3,9 @@
     {
       "executors": [
         {
+          "container_id": {
+            "value": "serenityBe2"
+          },
           "allocated": [
             {
               "name": "cpus",
@@ -64,6 +67,9 @@
           }
         },
         {
+          "container_id": {
+            "value": "serenityBe2"
+          },
           "allocated": [
             {
               "name": "cpus",
@@ -125,6 +131,9 @@
           }
         },
         {
+          "container_id": {
+            "value": "serenityBe2"
+          },
           "allocated": [
             {
               "revocable": {},
@@ -144,6 +153,14 @@
               "type": "SCALAR"
             }
           ],
+          "statistics": {
+            "cpus_limit": 1.1,
+            "cpus_system_time_secs": 1.17,
+            "cpus_user_time_secs": 3.37,
+            "mem_limit_bytes": 167772160,
+            "mem_rss_bytes": 70983680,
+            "timestamp": 1434982907.7405
+          },
           "executor_info": {
             "command": {
               "shell": true,
@@ -175,17 +192,12 @@
               }
             ],
             "source": "serenityBe1"
-          },
-          "statistics": {
-            "cpus_limit": 1.1,
-            "cpus_system_time_secs": 1.17,
-            "cpus_user_time_secs": 3.37,
-            "mem_limit_bytes": 167772160,
-            "mem_rss_bytes": 70983680,
-            "timestamp": 1434982907.7405
           }
         },
         {
+          "container_id": {
+            "value": "serenityBe2"
+          },
           "allocated": [
             {
               "name": "cpus",
@@ -246,6 +258,9 @@
           }
         },
         {
+          "container_id": {
+            "value": "serenityBe2"
+          },
           "allocated": [
             {
               "name": "cpus",
